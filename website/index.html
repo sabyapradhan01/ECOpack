@@ -1,0 +1,1339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>ECOpack</title>
+
+    <meta
+        name="description"
+        content="ECOpack - intelligent temperature-controlled and GPS-tracked storage."
+    >
+
+    <!-- Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+        rel="stylesheet"
+    >
+
+    <!-- Leaflet -->
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        crossorigin=""
+    >
+
+    <!-- ECOpack CSS -->
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<!-- =========================================================
+     AUTHENTICATION
+========================================================= -->
+
+<div id="authScreen" class="auth-screen">
+
+    <div class="auth-container">
+
+        <div class="brand-mark">
+            EP
+        </div>
+
+        <h1>ECOpack</h1>
+
+        <p class="auth-description">
+            Temperature-controlled, location-aware
+            storage for products that need care.
+        </p>
+
+        <div class="auth-divider"></div>
+
+
+        <!-- LOGIN -->
+
+        <form id="loginForm" class="auth-form">
+
+            <label for="loginEmail">EMAIL</label>
+
+            <input
+                type="email"
+                id="loginEmail"
+                placeholder="you@organisation.org"
+                required
+            >
+
+            <label for="loginPassword">PASSWORD</label>
+
+            <input
+                type="password"
+                id="loginPassword"
+                placeholder="Your password"
+                required
+            >
+
+            <button type="submit" class="primary-button">
+                Log in
+            </button>
+
+            <p id="loginError" class="auth-error"></p>
+
+        </form>
+
+
+        <!-- SIGN UP -->
+
+        <form id="signupForm" class="auth-form hidden">
+
+            <label for="signupName">NAME</label>
+
+            <input
+                type="text"
+                id="signupName"
+                placeholder="Your name"
+                required
+            >
+
+            <label for="signupEmail">EMAIL</label>
+
+            <input
+                type="email"
+                id="signupEmail"
+                placeholder="you@organisation.org"
+                required
+            >
+
+            <label for="signupPassword">PASSWORD</label>
+
+            <input
+                type="password"
+                id="signupPassword"
+                placeholder="Create a password"
+                minlength="6"
+                required
+            >
+
+            <label for="signupConfirmPassword">
+                CONFIRM PASSWORD
+            </label>
+
+            <input
+                type="password"
+                id="signupConfirmPassword"
+                placeholder="Repeat your password"
+                required
+            >
+
+            <button type="submit" class="primary-button">
+                Create account
+            </button>
+
+            <p id="signupError" class="auth-error"></p>
+
+        </form>
+
+
+        <!-- LOGIN / SIGNUP SWITCH -->
+
+        <div class="auth-switch">
+
+            <span id="authSwitchText">
+                Don't have an account?
+            </span>
+
+            <button
+                id="authSwitchButton"
+                class="text-button"
+                type="button"
+            >
+                Sign Up
+            </button>
+
+        </div>
+
+
+        <!-- DEMO LOGIN -->
+
+        <button
+            id="demoLoginButton"
+            class="demo-link"
+            type="button"
+        >
+            Continue with the demo workspace
+        </button>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     APPLICATION
+========================================================= -->
+
+<div id="appScreen" class="app-screen hidden">
+
+    <!-- HEADER -->
+
+    <header class="top-header">
+
+        <div class="header-brand">
+
+            <div class="small-brand-mark">
+                EP
+            </div>
+
+            <div>
+                <h2>ECOpack</h2>
+                <p>Pack Smart, Track Smarter</p>
+            </div>
+
+        </div>
+
+
+        <div class="header-right">
+
+            <div class="data-source">
+
+                <span>Data source</span>
+
+                <strong id="dataSourceLabel">
+                    DEMO
+                </strong>
+
+                <div class="source-switch">
+
+                    <button
+                        id="liveModeButton"
+                        type="button"
+                    >
+                        LIVE
+                    </button>
+
+                    <button
+                        id="demoModeButton"
+                        class="active"
+                        type="button"
+                    >
+                        DEMO
+                    </button>
+
+                </div>
+
+            </div>
+
+            <button
+                id="logoutButton"
+                class="logout-button"
+                type="button"
+            >
+                Logout
+            </button>
+
+        </div>
+
+    </header>
+
+
+    <!-- MAIN -->
+
+    <main class="main-content">
+
+
+        <!-- =================================================
+             CONTROL SURFACE
+        ================================================== -->
+
+        <section class="control-section">
+
+            <div class="section-label">
+                CONTROL SURFACE
+            </div>
+
+            <div class="control-row">
+
+                <h1>Storage box</h1>
+
+                <div class="box-controls">
+
+                    <select id="boxSelector">
+                    </select>
+
+                    <button
+                        id="createBoxButton"
+                        class="secondary-button"
+                        type="button"
+                    >
+                        + Create box
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <div class="workspace-status">
+
+                <span class="status-dot"></span>
+
+                <strong id="workspaceStatusText">
+                    Demo workspace
+                </strong>
+
+                <span id="workspaceStatusDescription">
+                    — simulated ESP32 sensor and GPS data
+                </span>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             SELECTED BOX
+        ================================================== -->
+
+        <section class="selected-box-section">
+
+            <div class="section-label">
+                SELECTED BOX
+            </div>
+
+            <div class="selected-box-header">
+
+                <div>
+
+                    <h2 id="selectedBoxName">
+                        Box 1
+                    </h2>
+
+                    <p id="selectedBoxDevice">
+                        ESP32_BOX_1
+                    </p>
+
+                </div>
+
+
+                <div class="device-status">
+
+                    <span
+                        id="deviceStatusDot"
+                        class="online-dot"
+                    ></span>
+
+                    <strong id="deviceStatusText">
+                        ONLINE
+                    </strong>
+
+                    <span id="lastSeenText">
+                        Last seen just now
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <div class="box-actions">
+
+                <button
+                    id="renameBoxButton"
+                    class="text-action-button"
+                    type="button"
+                >
+                    Rename box
+                </button>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             ENVIRONMENT GRID
+        ================================================== -->
+
+        <section class="environment-grid">
+
+
+            <!-- TEMPERATURE -->
+
+            <div class="environment-card">
+
+                <div class="card-top">
+
+                    <span class="section-label">
+                        TEMPERATURE
+                    </span>
+
+                    <strong id="temperatureRange">
+                        2–8° safe range
+                    </strong>
+
+                </div>
+
+
+                <div class="large-value">
+
+                    <span id="temperatureValue">
+                        4.8
+                    </span>
+
+                    <small>°C</small>
+
+                </div>
+
+
+                <div
+                    id="temperatureCondition"
+                    class="condition normal"
+                >
+
+                    <span></span>
+                    NORMAL
+
+                </div>
+
+
+                <div class="mini-chart">
+
+                    <svg
+                        viewBox="0 0 700 130"
+                        preserveAspectRatio="none"
+                    >
+
+                        <line
+                            x1="0"
+                            y1="95"
+                            x2="700"
+                            y2="95"
+                            class="chart-grid"
+                        />
+
+                        <line
+                            x1="0"
+                            y1="50"
+                            x2="700"
+                            y2="50"
+                            class="chart-grid"
+                        />
+
+                        <path
+                            id="temperaturePath"
+                            d=""
+                        />
+
+                    </svg>
+
+                </div>
+
+            </div>
+
+
+            <!-- FAN -->
+
+            <div class="environment-card fan-card">
+
+                <div class="card-top">
+
+                    <span class="section-label">
+                        COOLING SYSTEM
+                    </span>
+
+                </div>
+
+
+                <p class="fan-label">
+                    Fan status
+                </p>
+
+
+                <div class="fan-status">
+
+                    <span
+                        id="fanIndicator"
+                        class="fan-dot"
+                    ></span>
+
+                    <span id="fanStatusText">
+                        Off
+                    </span>
+
+                </div>
+
+
+                <p class="fan-description">
+                    The ESP32 controls the fan using the saved
+                    temperature limits.
+                </p>
+
+            </div>
+
+
+            <!-- HUMIDITY -->
+
+            <div class="environment-card humidity-card">
+
+                <div class="card-top">
+
+                    <span class="section-label">
+                        HUMIDITY
+                    </span>
+
+                    <strong id="humidityRange">
+                        40–60% safe range
+                    </strong>
+
+                </div>
+
+
+                <div class="large-value">
+
+                    <span id="humidityValue">
+                        52
+                    </span>
+
+                    <small>%</small>
+
+                </div>
+
+
+                <div
+                    id="humidityCondition"
+                    class="condition normal"
+                >
+
+                    <span></span>
+                    NORMAL
+
+                </div>
+
+
+                <div class="mini-chart">
+
+                    <svg
+                        viewBox="0 0 700 130"
+                        preserveAspectRatio="none"
+                    >
+
+                        <line
+                            x1="0"
+                            y1="95"
+                            x2="700"
+                            y2="95"
+                            class="chart-grid"
+                        />
+
+                        <line
+                            x1="0"
+                            y1="50"
+                            x2="700"
+                            y2="50"
+                            class="chart-grid"
+                        />
+
+                        <path
+                            id="humidityPath"
+                            d=""
+                        />
+
+                    </svg>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             GPS + CONFIGURATION
+        ================================================== -->
+
+        <section class="two-column-section">
+
+
+            <!-- GPS -->
+
+            <div class="large-card">
+
+                <div class="large-card-header">
+
+                    <div>
+
+                        <span class="section-label">
+                            PHYSICAL LOCATION
+                        </span>
+
+                        <h3>GPS tracking</h3>
+
+                    </div>
+
+
+                    <div class="gps-status">
+
+                        <span
+                            id="gpsStatusDot"
+                            class="online-dot"
+                        ></span>
+
+                        <strong id="gpsStatusText">
+                            FIXED
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <div class="gps-content">
+
+
+                    <div id="map"></div>
+
+
+                    <div class="gps-details">
+
+                        <div class="detail-row">
+
+                            <span>
+                                GPS status
+                            </span>
+
+                            <strong id="gpsStatusDetail">
+                                FIXED
+                            </strong>
+
+                        </div>
+
+
+                        <div class="detail-row">
+
+                            <span>
+                                Latitude
+                            </span>
+
+                            <strong id="latitudeValue">
+                                28.61386
+                            </strong>
+
+                        </div>
+
+
+                        <div class="detail-row">
+
+                            <span>
+                                Longitude
+                            </span>
+
+                            <strong id="longitudeValue">
+                                77.20896
+                            </strong>
+
+                        </div>
+
+
+                        <div class="detail-row">
+
+                            <span>
+                                Last updated
+                            </span>
+
+                            <strong id="gpsUpdatedValue">
+                                just now
+                            </strong>
+
+                        </div>
+
+
+                        <div class="detail-row">
+
+                            <span>
+                                Satellites
+                            </span>
+
+                            <strong id="satelliteValue">
+                                8
+                            </strong>
+
+                        </div>
+
+
+                        <div class="detail-row">
+
+                            <span>
+                                Accuracy
+                            </span>
+
+                            <strong id="accuracyValue">
+                                ±3 m
+                            </strong>
+
+                        </div>
+
+
+                        <div class="detail-row">
+
+                            <span>
+                                Speed
+                            </span>
+
+                            <strong id="speedValue">
+                                0 km/h
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="location-history">
+
+                    <span class="section-label">
+                        LOCATION HISTORY
+                    </span>
+
+                    <div
+                        id="locationHistoryBars"
+                        class="history-bars"
+                    >
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- CONFIGURATION -->
+
+            <div class="large-card configuration-card">
+
+                <div class="large-card-header">
+
+                    <div>
+
+                        <span class="section-label">
+                            CONFIGURATION
+                        </span>
+
+                        <h3>
+                            Product & limits
+                        </h3>
+
+                    </div>
+
+                    <span class="configuration-note">
+                        Saved locally for now
+                    </span>
+
+                </div>
+
+
+                <form id="settingsForm">
+
+
+                    <div class="form-group">
+
+                        <span class="section-label">
+                            PRODUCT INFORMATION
+                        </span>
+
+
+                        <div class="form-grid">
+
+
+                            <div>
+
+                                <label for="productName">
+                                    Name
+                                </label>
+
+                                <input
+                                    type="text"
+                                    id="productName"
+                                    placeholder="Product name"
+                                    required
+                                >
+
+                            </div>
+
+
+                            <div>
+
+                                <label for="productCategory">
+                                    Category
+                                </label>
+
+                                <select id="productCategory">
+
+                                    <option>
+                                        Medicine
+                                    </option>
+
+                                    <option>
+                                        Food
+                                    </option>
+
+                                    <option>
+                                        Fruits
+                                    </option>
+
+                                    <option>
+                                        Vegetables
+                                    </option>
+
+                                    <option>
+                                        Chemicals
+                                    </option>
+
+                                    <option>
+                                        Other
+                                    </option>
+
+                                </select>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <span class="section-label">
+                            SAFE TEMPERATURE
+                        </span>
+
+
+                        <div class="limit-grid">
+
+
+                            <div>
+
+                                <label for="temperatureMin">
+                                    Minimum
+                                </label>
+
+                                <div class="input-with-unit">
+
+                                    <input
+                                        type="number"
+                                        id="temperatureMin"
+                                        step="0.1"
+                                        required
+                                    >
+
+                                    <span>°C</span>
+
+                                </div>
+
+                            </div>
+
+
+                            <div>
+
+                                <label for="temperatureMax">
+                                    Maximum
+                                </label>
+
+                                <div class="input-with-unit">
+
+                                    <input
+                                        type="number"
+                                        id="temperatureMax"
+                                        step="0.1"
+                                        required
+                                    >
+
+                                    <span>°C</span>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <span class="section-label">
+                            SAFE HUMIDITY
+                        </span>
+
+
+                        <div class="limit-grid">
+
+
+                            <div>
+
+                                <label for="humidityMin">
+                                    Minimum
+                                </label>
+
+                                <div class="input-with-unit">
+
+                                    <input
+                                        type="number"
+                                        id="humidityMin"
+                                        step="1"
+                                        min="0"
+                                        max="100"
+                                        required
+                                    >
+
+                                    <span>%</span>
+
+                                </div>
+
+                            </div>
+
+
+                            <div>
+
+                                <label for="humidityMax">
+                                    Maximum
+                                </label>
+
+                                <div class="input-with-unit">
+
+                                    <input
+                                        type="number"
+                                        id="humidityMax"
+                                        step="1"
+                                        min="0"
+                                        max="100"
+                                        required
+                                    >
+
+                                    <span>%</span>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="settings-footer">
+
+                        <p id="settingsMessage"></p>
+
+                        <button
+                            class="primary-button small-button"
+                            type="submit"
+                        >
+                            Save settings
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             ANALYTICS + ACTIVITY
+        ================================================== -->
+
+        <section class="analytics-section">
+
+
+            <!-- ANALYTICS -->
+
+            <div class="large-card">
+
+                <div class="large-card-header">
+
+                    <div>
+
+                        <span class="section-label">
+                            LAST 12 READINGS
+                        </span>
+
+                        <h3>
+                            Live analytics
+                        </h3>
+
+                    </div>
+
+                    <span>
+                        Updates automatically
+                    </span>
+
+                </div>
+
+
+                <div class="analytics-container">
+
+
+                    <div class="analytics-row">
+
+                        <span>
+                            Temperature
+                        </span>
+
+                        <div class="analytics-chart">
+
+                            <svg
+                                viewBox="0 0 700 150"
+                                preserveAspectRatio="none"
+                            >
+
+                                <line
+                                    x1="0"
+                                    y1="40"
+                                    x2="700"
+                                    y2="40"
+                                    class="chart-grid"
+                                />
+
+                                <line
+                                    x1="0"
+                                    y1="75"
+                                    x2="700"
+                                    y2="75"
+                                    class="chart-grid"
+                                />
+
+                                <line
+                                    x1="0"
+                                    y1="110"
+                                    x2="700"
+                                    y2="110"
+                                    class="chart-grid"
+                                />
+
+                                <path
+                                    id="analyticsTemperaturePath"
+                                    d=""
+                                />
+
+                            </svg>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="analytics-row">
+
+                        <span>
+                            Humidity
+                        </span>
+
+                        <div class="analytics-chart">
+
+                            <svg
+                                viewBox="0 0 700 150"
+                                preserveAspectRatio="none"
+                            >
+
+                                <line
+                                    x1="0"
+                                    y1="40"
+                                    x2="700"
+                                    y2="40"
+                                    class="chart-grid"
+                                />
+
+                                <line
+                                    x1="0"
+                                    y1="75"
+                                    x2="700"
+                                    y2="75"
+                                    class="chart-grid"
+                                />
+
+                                <line
+                                    x1="0"
+                                    y1="110"
+                                    x2="700"
+                                    y2="110"
+                                    class="chart-grid"
+                                />
+
+                                <path
+                                    id="analyticsHumidityPath"
+                                    d=""
+                                />
+
+                            </svg>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- ACTIVITY -->
+
+            <div class="large-card">
+
+                <div class="large-card-header">
+
+                    <div>
+
+                        <span class="section-label">
+                            NEWEST FIRST
+                        </span>
+
+                        <h3>
+                            Recent activity
+                        </h3>
+
+                    </div>
+
+                </div>
+
+
+                <div
+                    id="activityList"
+                    class="activity-list"
+                >
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             SYSTEM STATUS
+        ================================================== -->
+
+        <section class="system-status-card">
+
+            <div class="system-header">
+
+                <div>
+
+                    <span class="section-label">
+                        SYSTEM STATUS
+                    </span>
+
+                    <h3 id="overallStatus">
+                        NORMAL
+                    </h3>
+
+                </div>
+
+
+                <div
+                    id="overallStatusIndicator"
+                    class="overall-status"
+                >
+
+                    <span></span>
+
+                    All conditions within limits
+
+                </div>
+
+            </div>
+
+
+            <div
+                id="systemStatusRows"
+                class="system-status-rows"
+            >
+            </div>
+
+        </section>
+
+
+        <div class="footer-note">
+            ECOpack frontend prototype. ESP32 and Firebase connection will be
+            integrated in the next stage.
+        </div>
+
+    </main>
+
+</div>
+
+
+<!-- =========================================================
+     CREATE BOX MODAL
+========================================================= -->
+
+<div
+    id="createBoxModal"
+    class="modal hidden"
+>
+
+    <div class="modal-content">
+
+        <div class="modal-header">
+
+            <div>
+
+                <span class="section-label">
+                    NEW DEVICE
+                </span>
+
+                <h2>Create box</h2>
+
+            </div>
+
+            <button
+                id="closeCreateBox"
+                class="close-button"
+                type="button"
+            >
+                ×
+            </button>
+
+        </div>
+
+
+        <form id="createBoxForm">
+
+            <label for="newBoxName">
+                BOX NAME
+            </label>
+
+            <input
+                id="newBoxName"
+                type="text"
+                placeholder="Box 2"
+                required
+            >
+
+
+            <label for="newBoxDevice">
+                ESP32 DEVICE ID
+            </label>
+
+            <input
+                id="newBoxDevice"
+                type="text"
+                placeholder="ESP32_BOX_2"
+                required
+            >
+
+
+            <div class="modal-actions">
+
+                <button
+                    id="cancelCreateBox"
+                    class="secondary-button"
+                    type="button"
+                >
+                    Cancel
+                </button>
+
+                <button
+                    class="primary-button small-button"
+                    type="submit"
+                >
+                    Create box
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<!-- =========================================================
+     RENAME BOX MODAL
+========================================================= -->
+
+<div
+    id="renameBoxModal"
+    class="modal hidden"
+>
+
+    <div class="modal-content">
+
+        <div class="modal-header">
+
+            <div>
+
+                <span class="section-label">
+                    BOX SETTINGS
+                </span>
+
+                <h2>Rename box</h2>
+
+            </div>
+
+            <button
+                id="closeRenameBox"
+                class="close-button"
+                type="button"
+            >
+                ×
+            </button>
+
+        </div>
+
+
+        <form id="renameBoxForm">
+
+            <label for="renameBoxInput">
+                BOX NAME
+            </label>
+
+            <input
+                id="renameBoxInput"
+                type="text"
+                required
+            >
+
+
+            <div class="modal-actions">
+
+                <button
+                    id="cancelRenameBox"
+                    class="secondary-button"
+                    type="button"
+                >
+                    Cancel
+                </button>
+
+                <button
+                    class="primary-button small-button"
+                    type="submit"
+                >
+                    Rename
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<!-- Leaflet -->
+<script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    crossorigin=""
+></script>
+
+<!-- ECOpack JavaScript -->
+<script type="module" src="script.js"></script>
+
+</body>
+</html>
